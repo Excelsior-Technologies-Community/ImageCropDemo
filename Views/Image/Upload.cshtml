@@ -1,0 +1,66 @@
+﻿<h2>Image Crop Demo</h2>
+
+<input type="file" id="imageInput" class="form-control mb-2" />
+
+<img id="preview" style="max-width:400px; border:1px solid #ccc;" />
+
+<br />
+<button id="cropBtn" class="btn btn-primary mt-2">Crop & Save</button>
+
+<input type="hidden" id="savedPath" />
+
+<!-- CropperJS v1.5.13 (DO NOT CHANGE VERSION) -->
+<link rel="stylesheet"
+      href="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.css" />
+<script src="https://unpkg.com/cropperjs@1.5.13/dist/cropper.min.js"></script>
+
+<script>
+    let cropper;
+    const input = document.getElementById("imageInput");
+    const image = document.getElementById("preview");
+
+    input.addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        if (cropper) {
+            cropper.destroy();
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            image.src = e.target.result;
+            cropper = new Cropper(image, {
+                aspectRatio: 1,
+                viewMode: 1,
+                autoCropArea: 1
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    document.getElementById("cropBtn").addEventListener("click", function () {
+        if (!cropper) {
+            alert("Select image first");
+            return;
+        }
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 400,
+            height: 400
+        });
+
+        const base64 = canvas.toDataURL("image/png");
+
+        fetch("/Image/Save", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageBase64: base64 })
+        })
+        .then(res => res.json())
+        .then(d => {
+            document.getElementById("savedPath").value = d.path;
+            alert("Image saved successfully");
+        });
+    });
+</script>

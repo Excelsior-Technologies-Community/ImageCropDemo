@@ -1,0 +1,11 @@
+﻿@model IEnumerable<ImageCropDemo.Models.CroppedImage>
+
+<h2>Saved Images</h2>
+
+@foreach (var img in Model)
+{
+    <div class="mb-3">
+        <img src="@img.ImagePath" width="200" />
+        <p>@img.CreatedAt</p>
+    </div>
+}
